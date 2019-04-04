@@ -23,6 +23,8 @@ using Android.Content.PM;
 namespace FlironeTest
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+    [Android.App.IntentFilter(actions: new[] { "android.hardware.usb.action.USB_DEVICE_ATTACHED" })]
+    [Android.App.MetaData(Android.Hardware.Usb.UsbManager.ActionUsbAccessoryDetached, Resource = "@xml/device_filter")]
     public class MainActivity : AppCompatActivity, Device.IDelegate, FrameProcessor.IDelegate, Device.IStreamDelegate
     {
         private Device flirDevice;
@@ -34,17 +36,27 @@ namespace FlironeTest
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.activity_main);
 
-            List<RenderedImage.ImageType> lstType = new List<RenderedImage.ImageType>();
-            lstType.Add(RenderedImage.ImageType.BlendedMSXRGBA8888Image);
-            //lstType.Add(RenderedImage.ImageType.ThermalLinearFlux14BitImage);
-            //lstType.Add(RenderedImage.ImageType.ThermalRGBA8888Image);
-            //lstType.Add(RenderedImage.ImageType.ThermalRadiometricKelvinImage);
-            //lstType.Add(RenderedImage.ImageType.VisibleAlignedRGBA8888Image);
-            //lstType.Add(RenderedImage.ImageType.VisibleUnalignedYUV888Image);
-            //lstType.Add(RenderedImage.ImageType.VisualJPEGImage);
-            //lstType.Add(RenderedImage.ImageType.VisualYCbCr888Image);
+            try
+            {
+                List<RenderedImage.ImageType> lstType = new List<RenderedImage.ImageType>();
+                lstType.Add(RenderedImage.ImageType.BlendedMSXRGBA8888Image);
+                //lstType.Add(RenderedImage.ImageType.ThermalLinearFlux14BitImage);
+                //lstType.Add(RenderedImage.ImageType.ThermalRGBA8888Image);
+                //lstType.Add(RenderedImage.ImageType.ThermalRadiometricKelvinImage);
+                //lstType.Add(RenderedImage.ImageType.VisibleAlignedRGBA8888Image);
+                //lstType.Add(RenderedImage.ImageType.VisibleUnalignedYUV888Image);
+                //lstType.Add(RenderedImage.ImageType.VisualJPEGImage);
+                //lstType.Add(RenderedImage.ImageType.VisualYCbCr888Image);
 
-            frameProcessor = new FrameProcessor(this, this, lstType);
+                frameProcessor = new FrameProcessor(this, this, lstType);
+
+                //아래꺼는 Simulated 테스트에서만 사용, 장비 연결할 경우는 주석 처리
+                flirDevice = new SimulatedDevice(this, this, Resources.OpenRawResource(Resource.Raw.sampleframes), 10);
+            }
+            catch(Exception e)
+            {
+                System.Console.WriteLine(e.Message);
+            }
         }
 
         protected override void OnResume()
@@ -71,7 +83,7 @@ namespace FlironeTest
         /// <param name="device"></param>
         public void OnDeviceConnected(Device device)
         {
-            flirDevice = device;
+            //flirDevice = device; //장비 연결할 경우는 여기 주석 해제
             device.StartFrameStream(this);
         }
 
@@ -90,7 +102,8 @@ namespace FlironeTest
 
             //온도 값이 이렇게 계산하고 있습니다. 
             //PreviewActivity.java 소스 중에 onFrameProcessed () 여기 함수부분을 C#으로 변경.
-            if (renderedImage.InvokeImageType() == RenderedImage.ImageType.ThermalRadiometricKelvinImage)
+            //if (renderedImage.InvokeImageType(). == RenderedImage.ImageType.ThermalRadiometricKelvinImage)
+            if (renderedImage.InvokeImageType() == RenderedImage.ImageType.BlendedMSXRGBA8888Image)
             {
                 int[] thermalPixels = renderedImage.ThermalPixelValues();
 

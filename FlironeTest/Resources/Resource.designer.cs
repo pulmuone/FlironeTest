@@ -3889,6 +3889,9 @@ namespace FlironeTest
 			// aapt resource value: 0x7f090000
 			public const int default_camera_files = 2131296256;
 			
+			// aapt resource value: 0x7f090001
+			public const int sampleframes = 2131296257;
+			
 			static Raw()
 			{
 				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
